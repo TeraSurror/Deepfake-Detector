@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+        integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+
+    <title>DeepFake Detection</title>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">DeepFake Detector</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#"></a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#"></a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="#"></a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container mt-3">
+        <div class="row">
+            <div class="col-sm-12">
+                <h1 style="text-align: center;">DeepFake <span style="font-weight: lighter;">Detection</span></h1>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container" style="margin-top: 3em;">
+        <div class="row">
+            <div class="col-sm-4"></div>
+
+            <div class="col-sm-4"
+                style="padding: 2em; box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);">
+                <h4 style="text-align: center;">File Upload</h4>
+                <br>
+                <div>
+                    <form method="post" enctype="multipart/form-data" action="detect_deepfake"
+                        class="d-flex flex-column">
+                        {%csrf_token%}
+                        <div class="form-group">
+                            <input name="myfile" type="file" class="form-control-file" id="doc_upload">
+                        </div>
+                        <br>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
+
+                    
+                </div>
+
+            </div>
+
+            <div class="col-sm-4"></div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-12">
+                    {% if uploaded_file_url %}
+                    <img src="{{ output_file_url }}">
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+
+</body>
+
+</html>
