@@ -16,10 +16,17 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from django.conf.urls import url
-from video_upload import views
+from video_upload import views	
+from DeepFakeWebApp import settings
+from django.contrib.staticfiles.urls import static
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     url('^$', views.index, name="Home Page"),
     url('detect_deepfake', views.detect_deepfake, name="Predicion Page")
 ]
+
+
+urlpatterns += staticfiles_urlpatterns()
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

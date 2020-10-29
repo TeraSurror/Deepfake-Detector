@@ -5,6 +5,8 @@ from django.core.files.storage import FileSystemStorage
 ########################################################
 # Imports for Image model
 ########################################################
+import joblib
+
 import numpy as np
 from keras.preprocessing import image
 import pandas as pd
@@ -60,80 +62,83 @@ from sklearn.linear_model import SGDClassifier
 ########################################################
 
 
-def create_base_network(embedding_size):
-	"""
-	Base network to be shared (eq. to feature extraction).
-	"""
-	main_input = Input(shape=(512, ))
-	x = Dense(256, activation='relu', kernel_initializer='he_uniform')(main_input)
-	x = Dropout(0.1)(x)
-	x = Dense(256, activation='relu', kernel_initializer='he_uniform')(x)
-	x = Dropout(0.1)(x)
-	x = Dense(128, activation='relu', kernel_initializer='he_uniform')(x)
-	x = Dropout(0.1)(x)
-	y = Dense(embedding_size)(x)
-	base_network = Model(main_input, y)
+def create_base_network(input_image_shape, embedding_size):
+    """
+    Base network to be shared (eq. to feature extraction).
+    """
+    print("1")
+    main_input = Input(shape=(512, ))
+    x = Dense(256, activation='relu', kernel_initializer='he_uniform')(main_input)
+    x = Dropout(0.1)(x)
+    x = Dense(256, activation='relu', kernel_initializer='he_uniform')(x)
+    x = Dropout(0.1)(x)
+    x = Dense(128, activation='relu', kernel_initializer='he_uniform')(x)
+    x = Dropout(0.1)(x)
+    y = Dense(embedding_size)(x)
+    base_network = Model(main_input, y)
 
-	return base_network
+    return base_network
 
 def extract_face_from_image(image):
-  detector = MTCNN()  
+    print("2")
+    detector = MTCNN()  
 
-  faces_image_data = detector.detect_faces(image)
+    faces_image_data = detector.detect_faces(image)
 
-  faces_image_data_op = []
+    faces_image_data_op = []
 
-  for face_image_data in faces_image_data: 
-  
-    x = face_image_data["box"][0]
-    y = face_image_data["box"][1]
-    w = face_image_data["box"][2]
-    h = face_image_data["box"][3]
+    for face_image_data in faces_image_data: 
 
-    face_image = image[y:y+h, x:x+w]
+        x = face_image_data["box"][0]
+        y = face_image_data["box"][1]
+        w = face_image_data["box"][2]
+        h = face_image_data["box"][3]
 
-    face_image_dict = {
-        "x" : x,
-        "y" : y,
-        "w" : w,
-        "h" : h,
-        "face_image" : face_image
-    }
+        face_image = image[y:y+h, x:x+w]
 
-    faces_image_data_op.append(face_image_dict)
+        face_image_dict = {
+            "x" : x,
+            "y" : y,
+            "w" : w,
+            "h" : h,
+            "face_image" : face_image
+        }
 
-  return faces_image_data_op
+        faces_image_data_op.append(face_image_dict)
+
+    return faces_image_data_op
 
 
 def extract_facenet_embeddings(face_image):
-  embedder = FaceNet()
-  x = image.img_to_array(face_image)
-  x = np.expand_dims(x, axis=0)
-  embeddings = embedder.embeddings(x)
+    print("3")
+    embedder = FaceNet()
+    x = image.img_to_array(face_image)
+    x = np.expand_dims(x, axis=0)
+    embeddings = embedder.embeddings(x)
 
-  return embeddings
+    return embeddings
 
 
 def predict_deepfake(input_embedding, input_image_shape, embedding_size):
+    print("4")
+    testing_embeddings = create_base_network(input_image_shape, embedding_size=embedding_size)
 
-  testing_embeddings = create_base_network(input_image_shape, embedding_size=embedding_size)
+    # Load Pretrained model
+    model_tr = load_model("D:/harsh/Projects/Django Projects/DeepFakeWebApp/video_upload/triplets_semi_hard.hdf5", custom_objects={'triplet_loss_adapted_from_tf': triplet_loss_adapted_from_tf})
 
-  # Load Pretrained model
-  model_tr = load_model("triplets_semi_hard.hdf5", custom_objects={'triplet_loss_adapted_from_tf': triplet_loss_adapted_from_tf})
-  
-  # Grabbing the weights from the trained network
-  for layer_target, layer_source in zip(testing_embeddings.layers, model_tr.layers[2].layers):
-    weights = layer_source.get_weights()
-    layer_target.set_weights(weights)
-    del weights        
+    # Grabbing the weights from the trained network
+    for layer_target, layer_source in zip(testing_embeddings.layers, model_tr.layers[2].layers):
+        weights = layer_source.get_weights()
+        layer_target.set_weights(weights)
+        del weights        
 
-  prediction = testing_embeddings.predict(input_embedding)
+    prediction = testing_embeddings.predict(input_embedding)
 
-  
-  sgd_loaded = pickle.load('sgd.pkl')
-  pred = sgd_loaded.predict(prediction)
+    filename = 'D:/harsh/Projects/Django Projects/DeepFakeWebApp/video_upload/sgd.pkl'
+    sgd_loaded = joblib.load(open(filename, 'rb'))
+    pred = sgd_loaded.predict(prediction)
 
-  return pred
+    return pred
 
 
 def detect_deepfake_image(img_path):
@@ -142,7 +147,7 @@ def detect_deepfake_image(img_path):
     # Read image from path
 
     img = cv2.imread(img_path)
-    print(img)
+    
 
 
     # Extract face from image
@@ -164,6 +169,7 @@ def detect_deepfake_image(img_path):
 
         # Predict
         output = predict_deepfake(x1, (None, 512), 64)
+        print("Output:")
         print(output)
 
 
@@ -176,7 +182,7 @@ def detect_deepfake_image(img_path):
         cv2.rectangle(img, (x, y), (x + w, y + h), (0,0,255), 1)
         cv2.putText(img, label, (x+5, y + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1)
 
-    cv2.imwrite('model/output/op.jpg', img)
+    cv2.imwrite('D:/harsh/Projects/Django Projects/DeepFakeWebApp/media/output/op.jpg', img)
 
 ########################################################
 
@@ -358,6 +364,6 @@ def detect_deepfake(request):
 
         return render(request, 'index.html', {
             'uploaded_file_url': uploaded_file_url,
-            'output_file_url' : 'DeepFakeWebApp/media/output/op.jpg'
+            'output_file_url' : 'D:/harsh/Projects/Django Projects/DeepFakeWebApp/media/output/op.jpg'
         })
     return render(request, 'index.html')
