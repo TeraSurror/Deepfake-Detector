@@ -362,8 +362,10 @@ def detect_deepfake(request):
 
         detect_deepfake_image("D:/harsh/Projects/Django Projects/DeepFakeWebApp/media/" + filename)
 
-        return render(request, 'index.html', {
+        return render(request, 'predict.html', {
             'uploaded_file_url': uploaded_file_url,
             'output_file_url' : 'D:/harsh/Projects/Django Projects/DeepFakeWebApp/media/output/op.jpg'
         })
+
+
     return render(request, 'index.html')
