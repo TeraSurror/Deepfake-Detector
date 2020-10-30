@@ -24,7 +24,8 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 urlpatterns = [
     path('admin/', admin.site.urls),
     url('^$', views.index, name="Home Page"),
-    url('detect_deepfake', views.detect_deepfake, name="Predicion Page")
+    url('detect_deepfake_image', views.detect_deepfake_image, name="Image Predicion Page"),
+    url('detect_deepfake_video', views.detect_deepfake_video, name="Video Predicion Page")
 ]
 
 

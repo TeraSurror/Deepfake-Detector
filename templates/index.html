@@ -49,14 +49,14 @@
 
     <div class="container" style="margin-top: 3em;">
         <div class="row">
-            <div class="col-sm-4"></div>
+            <div class="col-sm-1"></div>
 
             <div class="col-sm-4"
                 style="padding: 2em; box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);">
-                <h4 style="text-align: center;">File Upload</h4>
+                <h4 style="text-align: center;">Image File Upload</h4>
                 <br>
                 <div>
-                    <form method="post" enctype="multipart/form-data" action="detect_deepfake"
+                    <form method="post" enctype="multipart/form-data" action="detect_deepfake_image"
                         class="d-flex flex-column">
                         {%csrf_token%}
                         <div class="form-group">
@@ -70,8 +70,28 @@
                 </div>
 
             </div>
+            <div class="col-sm-2"></div>
+            <div class="col-sm-4"
+                style="padding: 2em; box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);">
+                <h4 style="text-align: center;">Video File Upload</h4>
+                <br>
+                <div>
+                    <form method="post" enctype="multipart/form-data" action="detect_deepfake_video"
+                        class="d-flex flex-column">
+                        {%csrf_token%}
+                        <div class="form-group">
+                            <input name="myfile1" type="file" class="form-control-file" id="doc_upload">
+                        </div>
+                        <br>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </form>
 
-            <div class="col-sm-4"></div>
+                    
+                </div>
+
+            </div>
+
+            <div class="col-sm-1"></div>
         </div>
         <br>
 
